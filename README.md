@@ -145,9 +145,9 @@ Again, dowloaded RPM files will be placed into "rpms/" folder for later use (and
 
    You can specify the reference ISO to be used with this variable like;
 
-        # RMISO="Rocky-8.1.1911-x86_64-boot.iso" ./bootstrap.sh run force
+        # RMISO="Rocky-8.3.2011-x86_64-boot.iso" ./bootstrap.sh run force
 
-   Script will use "Rocky-8.1.1911-x86\_64-boot.iso" by default if such variable is not given.
+   Script will use "Rocky-8.3.2011-x86\_64-boot.iso" by default if such variable is not given.
 - **RMOUT**="resulting iso filename"
 
    You can specify the name of resulting ISO file. For example;

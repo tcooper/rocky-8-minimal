@@ -5,19 +5,19 @@
 # Evironment variables
 #
 #    RMVERBOSE  : increase verbosity (set any value)
-#    RMISO      : official ISO to use (i.e. Rocky-8.1.1911-x86_64-boot.iso)
-#    RMOUT      : resultig ISO file name (i.e. Rocky-8.1.1911-x86_64-minimal.iso)
+#    RMISO      : official ISO to use (i.e. Rocky-8.3.2011-x86_64-boot.iso)
+#    RMOUT      : resultig ISO file name (i.e. Rocky-8.3.2011-x86_64-minimal.iso)
 #    RMETH      : dependency resolving method to use (deep or fast)
 #
 # Default values
 #
 # default official ISO to use
-iso="Rocky-8.1.1911-x86_64-boot.iso"
+iso="Rocky-8.3.2011-x86_64-boot.iso"
 #
 # resulting ISO file name and volume label
 # such values will be determined again according to source image during ISO mount
-out="Rocky-8.1.1911-x86_64-minimal.iso"
-lbl="Rocky-8-1-1911-x86_64"
+out="Rocky-8.3.2011-x86_64-minimal.iso"
+lbl="Rocky-8-3-2011-x86_64"
 #
 # dependency resolving method
 # deep: check dependency of every package one by one

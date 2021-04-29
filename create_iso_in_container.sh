@@ -7,4 +7,4 @@
 ./bootstrap.sh step createrepo
 ./bootstrap.sh step createiso
 ./bootstrap.sh step isounmount
-cp ./Rocky-8.1.1911-x86_64-minimal.iso /mnt/
+cp ./Rocky-8.3.2011-x86_64-minimal.iso /mnt/
