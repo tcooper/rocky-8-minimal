@@ -313,7 +313,7 @@ function rmrpmdownload() {
       exit 1
    fi
    mkdir -p rpms
-   yumdownloader --urlprotocol http --urls "${@}" 2>/dev/null | \
+   dnf download --urls "${@}" 2>/dev/null | \
       grep "^http" | \
       sort | uniq | \
    while read u; do
@@ -351,7 +351,7 @@ function rpmdownload() {
    fi
    ul="${RMURL}"
    if [ "${ul}" == "" ]; then
-      ul="$(yumdownloader --urlprotocol http --urls "${@}" 2>/dev/null | \
+      ul="$(dnf download --urls "${@}" 2>/dev/null | \
             grep "^http" | \
             sort | uniq)"
    fi
@@ -396,7 +396,7 @@ function rmrpmurl() {
       echo
       exit 1
    fi
-   yumdownloader --urlprotocol http --urls "${@}" | \
+   dnf download --urls "${@}" | \
       grep "^http" | \
       sort | uniq > "${pw}/.urls"
 }
@@ -648,12 +648,12 @@ fi
 if [ "$(cat /etc/rocky-release | grep "Rocky Linux release 8")" == "" ]; then
    rmnotrocky
 fi
-if [ ! -e "/usr/bin/repoquery" -o ! -e "/usr/bin/createrepo" -o ! -e "/usr/bin/yumdownloader" -o ! -e "/usr/bin/curl" -o ! -e "/usr/bin/mkisofs" ]; then
+if [ ! -e "/usr/bin/repoquery" -o ! -e "/usr/bin/createrepo" -o ! -e "/usr/bin/yumdownloader" -o ! -e "/usr/bin/dnf" -o ! -e "/usr/bin/curl" -o ! -e "/usr/bin/mkisofs" ]; then
    echo
    echo " ! Some additional packages needs to be installed."
    echo "   Please run following command to have them all:"
    echo
-   echo "   yum -y install yum-utils createrepo syslinux genisoimage isomd5sum bzip2 curl file"
+   echo "   yum -y install dnf yum yum-utils createrepo syslinux genisoimage isomd5sum bzip2 curl file"
    echo
    exit 1
 fi
