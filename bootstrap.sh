@@ -137,7 +137,7 @@ function rmclean() {
 
 function rmcreatetemplate() {
    if [ ! -d "${md}" ]; then
-      if [ "${CMSTEP}" != "" ]; then
+      if [ "${RMSTEP}" != "" ]; then
          echo " ! ISO not mounted, please run;"
          echo "   ${0} step isomount"
          echo
@@ -197,7 +197,7 @@ function rmcreatetemplate() {
 function resolvefast() {
    # input arguments
    # package [package ..]
-   tf="${CMTEMP}"
+   tf="${RMTEMP}"
    vb="${RMVERBOSE}"
    if [ "${vb}" != "" ]; then
       echo "${@}" | tr " " "\n" | rmpipe "   "
@@ -213,8 +213,8 @@ function resolvefast() {
 function resolvedeep() {
    # input arguments
    # package [package ..]
-   s="${CMSEP}-"
-   tf="${CMTEMP}"
+   s="${RMSEP}-"
+   tf="${RMTEMP}"
    vb="${RMVERBOSE}"
    repoquery --requires --resolve "${@}" 2>/dev/null | \
       awk -F":" {'print $1'} | \
@@ -235,7 +235,7 @@ function resolvedeep() {
          else
             echo -n ","
          fi
-         CMSEP="${s}" resolvedeep "${line}"
+         RMSEP="${s}" resolvedeep "${line}"
       fi
    done
 }
@@ -252,10 +252,10 @@ function rmfulldeps() {
    touch ".pkgs" ".tree"
    echo " ~ Resolving dependencies for ${@}"
    if [ "${met}" == "deep" ]; then
-      RMVERBOSE=1 CSEP=" " CMTEMP=".pkgs" resolvedeep "${@}"
+      RMVERBOSE=1 RMSEP=" " RMTEMP=".pkgs" resolvedeep "${@}"
    else
       rm -f .fast
-      RMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
+      RMVERBOSE=1 RMTEMP=".fast" resolvefast "${@}"
       cat .fast | sort | uniq > .pkgs
       rm -f .fast
    fi
@@ -281,7 +281,7 @@ function rmcreatelist() {
    cat .core | sort | uniq | while read line; do
       if [ "${met}" == "deep" ]; then
          if [ "${RMVERBOSE}" != "" ]; then
-            CMTEMP=".pkgs" CMSEP=" " resolvedeep "${line}"
+            RMTEMP=".pkgs" RMSEP=" " resolvedeep "${line}"
          fi
       fi
       echo "${line}" >> .pkgs
@@ -291,10 +291,10 @@ function rmcreatelist() {
    done
    if [ "${met}" == "deep" ]; then
       if [ "${RMVERBOSE}" == "" ]; then
-         CMTEMP=".pkgs" CMSEP=" " resolvedeep $(cat .core | sort | uniq | tr "\n" " ")
+         RMTEMP=".pkgs" RMSEP=" " resolvedeep $(cat .core | sort | uniq | tr "\n" " ")
       fi
    else
-      CMTEMP=".pkgs" resolvefast $(cat .core | sort | uniq | tr "\n" " ")
+      RMTEMP=".pkgs" resolvefast $(cat .core | sort | uniq | tr "\n" " ")
    fi
    rm -f .core
    cat .pkgs | sort | uniq > .pkgf
@@ -349,7 +349,7 @@ function rpmdownload() {
       echo
       exit 1
    fi
-   ul="${CMURL}"
+   ul="${RMURL}"
    if [ "${ul}" == "" ]; then
       ul="$(yumdownloader --urlprotocol http --urls "${@}" 2>/dev/null | \
             grep "^http" | \
@@ -391,7 +391,7 @@ function rpmdownload() {
 function rmrpmurl() {
    # input arguments
    # package [package ..]
-   if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
+   if [ "${RMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step rpmurl <package> [package ..]"
       echo
       exit 1
@@ -404,7 +404,7 @@ function rmrpmurl() {
 function rmrpmname() {
    # input arguments
    # package [package ..]
-   if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
+   if [ "${RMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step rpmname <package> [package ..]"
       echo
       exit 1
@@ -419,7 +419,7 @@ function rmcollectrpm() {
    # input arguments
    # package [package ..]
    vb="${RMVERBOSE}"
-   if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
+   if [ "${RMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step collectrpm <package> [package ..]"
       echo
       exit 1
@@ -454,7 +454,7 @@ function rmcollectrpm() {
             if [ "${vb}" != "" ]; then
                echo "downloading: ${pk}, ${r}"
             fi
-            dd="$(CMURL="${fu}" rpmdownload "${pk}")"
+            dd="$(RMURL="${fu}" rpmdownload "${pk}")"
             if [ "${dd}" == "" ]; then
                echo "${pk}:${r}:<none>" >> .miss
                if [ "${vb}" != "" ]; then
@@ -601,10 +601,10 @@ function rmjobsingle() {
    touch .pkgs .tree
    echo " ~ Creating package list for ${@} "
    if [ "${met}" == "deep" ]; then
-      RMVERBOSE=1 CMTEMP=".pkgs" CMSEP=" " resolvedeep "${@}"
+      RMVERBOSE=1 RMTEMP=".pkgs" RMSEP=" " resolvedeep "${@}"
    else
       rm -f .fast
-      RMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
+      RMVERBOSE=1 RMTEMP=".fast" resolvefast "${@}"
       cat .fast | sort | uniq > .pkgs
    fi
    echo " ~ Package with dependencies"
@@ -694,7 +694,7 @@ elif [ "${1}" == "step" ]; then
    fi
    cmd="cm${1}"
    shift
-   RMVERBOSE=1 CMSTEP=1 ${cmd} "${@}"
+   RMVERBOSE=1 RMSTEP=1 ${cmd} "${@}"
 else
    rmusage
 fi
