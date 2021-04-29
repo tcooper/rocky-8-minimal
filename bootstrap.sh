@@ -31,13 +31,13 @@ dp="${pw}/image"
 md="${pw}/mtemp"
 bo="${dp}/BaseOS"
 
-function cmusage() {
+function rmusage() {
    echo "Usage: ${0} <run [force] | clean | debug [package [package ..]] | step ..>"
    echo
    exit 1
 }
 
-function cmusagestep() {
+function rmusagestep() {
    echo "Usage: ${0} step .."
    echo
    echo " Workflow steps:"
@@ -57,28 +57,28 @@ function cmusagestep() {
    exit 1
 }
 
-function cmnotrocky() {
+function rmnotrocky() {
    echo
    echo " ! This script is not suitable to use in this platform"
    echo
    exit 1
 }
 
-function cmcheck() {
+function rmcheck() {
   if [ "${PIPESTATUS[0]}" != "0" ]; then
     exit 1
   fi
 }
 
-function cmpipe() {
+function rmpipe() {
    while read line; do
       echo "   ${1}${line}"
    done
 }
 
-function cmdot() {
+function rmdot() {
    if [ "${RMVERBOSE}" != "" ]; then
-      cmpipe
+      rmpipe
    else
       echo -n "   "
       while read line; do
@@ -88,7 +88,7 @@ function cmdot() {
    fi
 }
 
-function cmisounmount() {
+function rmisounmount() {
    if [ -d "${md}" ]; then
       echo -n " ~ unmount ISO .."
       umount "${md}" 2>/dev/null
@@ -97,7 +97,7 @@ function cmisounmount() {
    fi
 }
 
-function cmisomount() {
+function rmisomount() {
    if [ ! -e "${iso}" ]; then
       echo
       echo " ! Reference ISO (${iso}) not found."
@@ -112,15 +112,15 @@ function cmisomount() {
       echo
       exit 1
    fi
-   cmisounmount
+   rmisounmount
    echo " ~ mount ISO "
    if [ ! -d "${md}" ]; then
       mkdir -p "${md}"
-      mount -o loop "${iso}" "${md}" 2>&1 | cmpipe
-      cmcheck
+      mount -o loop "${iso}" "${md}" 2>&1 | rmpipe
+      rmcheck
       echo "   ${md} mounted"
       if [ "$(cat "${md}/isolinux/isolinux.cfg" | grep "Rocky Linux 8")" == "" ]; then
-         cmisounmount
+         rmisounmount
          echo
          echo " ! Reference ISO should be one of the Rocky 8 distribution."
          echo
@@ -129,13 +129,13 @@ function cmisomount() {
    fi
 }
 
-function cmclean() {
-   cmisounmount
+function rmclean() {
+   rmisounmount
    rm -rf "${dp}"
    rm -f target_comps.xml "${out}" .[cpmrdtfu]*
 }
 
-function cmcreatetemplate() {
+function rmcreatetemplate() {
    if [ ! -d "${md}" ]; then
       if [ "${CMSTEP}" != "" ]; then
          echo " ! ISO not mounted, please run;"
@@ -150,7 +150,7 @@ function cmcreatetemplate() {
    mkdir -p "${bo}/Packages"
    echo -n "."
    cp -r "${md}/EFI" "${dp}/"
-   cmcheck
+   rmcheck
    echo -n "."
 
    cp "templ_discinfo" "${dp}/.discinfo"
@@ -159,7 +159,7 @@ function cmcreatetemplate() {
    cp -r "${md}/isolinux" "${dp}/"
    echo -n "."
    cp -r "${md}/images" "${dp}/"
-   cmcheck
+   rmcheck
    rm -f "${dp}/.treeinfo"
    touch "${dp}/.treeinfo"
    while IFS=  read line; do
@@ -200,7 +200,7 @@ function resolvefast() {
    tf="${CMTEMP}"
    vb="${RMVERBOSE}"
    if [ "${vb}" != "" ]; then
-      echo "${@}" | tr " " "\n" | cmpipe "   "
+      echo "${@}" | tr " " "\n" | rmpipe "   "
    fi
    repoquery --requires --resolve --recursive "${@}" 2>/dev/null | \
       awk -F":" {'print $1'} | \
@@ -240,7 +240,7 @@ function resolvedeep() {
    done
 }
 
-function cmfulldeps() {
+function rmfulldeps() {
    # input arguments
    # package [package ..]
    if [ "${1}" == "" ]; then
@@ -260,10 +260,10 @@ function cmfulldeps() {
       rm -f .fast
    fi
    echo " ~ Full dependency list of ${1}"
-   cat .pkgs | sort | cmpipe "   "
+   cat .pkgs | sort | rmpipe "   "
 }
 
-function cmcreatelist() {
+function rmcreatelist() {
    echo -n " ~ Creating package list "
    rm -f .core
    echo -n "."
@@ -304,7 +304,7 @@ function cmcreatelist() {
    fi
 }
 
-function cmrpmdownload() {
+function rmrpmdownload() {
    # input arguments
    # package [package ..]
    if [ "${1}" == "" ]; then
@@ -388,7 +388,7 @@ function rpmdownload() {
    done
 }
 
-function cmrpmurl() {
+function rmrpmurl() {
    # input arguments
    # package [package ..]
    if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
@@ -401,7 +401,7 @@ function cmrpmurl() {
       sort | uniq > "${pw}/.urls"
 }
 
-function cmrpmname() {
+function rmrpmname() {
    # input arguments
    # package [package ..]
    if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
@@ -415,7 +415,7 @@ function cmrpmname() {
       sort | uniq
 }
 
-function cmcollectrpm() {
+function rmcollectrpm() {
    # input arguments
    # package [package ..]
    vb="${RMVERBOSE}"
@@ -424,7 +424,7 @@ function cmcollectrpm() {
       echo
       exit 1
    fi
-   cmrpmurl "${@}"
+   rmrpmurl "${@}"
    dl="$(cat "${pw}/.urls")"
    rr="$(echo "${dl}" | awk -F"/" {'print $NF'} | sort | uniq)"
    if [ "${rr}" != "" ]; then
@@ -496,7 +496,7 @@ function cmcollectrpm() {
    fi
 }
 
-function cmcollectrpms() {
+function rmcollectrpms() {
    tp="$(cat .pkgs | sort | uniq | wc -l)"
    echo " ~ Searching RPMs for ${tp} package(s)"
    if [ "${RMVERBOSE}" == "" ]; then
@@ -504,13 +504,13 @@ function cmcollectrpms() {
    fi
    rm -f .miss .rslv .dler
    mkdir -p rpms
-   cmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
+   rmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
    if [ "${RMVERBOSE}" == "" ]; then
       echo " done"
    fi
 }
 
-function cmcreaterepo() {
+function rmcreaterepo() {
    if [ ! -d "${bo}/Packages" ]; then
       echo " ! Image temmplate is not ready, please run;"
       echo "   ${0} step createtemplate"
@@ -536,15 +536,15 @@ function cmcreaterepo() {
    echo " done"
    echo " ~ Creating repodata "
    cd "${bo}"
-   cmcheck
+   rmcheck
    rm -rf repodata
-   createrepo -g "${uc}" . 2>&1 | cmdot
-   cmcheck
+   createrepo -g "${uc}" . 2>&1 | rmdot
+   rmcheck
    cd "${pw}"
    rm -f "${uc}"
 }
 
-function cmcreateiso() {
+function rmcreateiso() {
    if [ ! -d "${bo}/repodata" ]; then
       echo " ! Repo is not ready, please run;"
       echo "   ${0} step createrepo"
@@ -577,24 +577,24 @@ function cmcreateiso() {
       -eltorito-alt-boot \
       -e images/efiboot.img \
       -no-emul-boot \
-      -R -J -v -T . 2>&1 | cmdot
-      cmcheck
+      -R -J -v -T . 2>&1 | rmdot
+      rmcheck
    if [ -e "/usr/bin/isohybrid" ]; then
       echo " ~ ISO hybrid"
-      isohybrid --uefi "${pw}/${out}" | cmdot
-      cmcheck
+      isohybrid --uefi "${pw}/${out}" | rmdot
+      rmcheck
    fi
    if [ -e "/usr/bin/implantisomd5" ]; then
       echo " ~ Implant ISO MD5"
-      implantisomd5 --force --supported-iso "${pw}/${out}" | cmdot
-      cmcheck
+      implantisomd5 --force --supported-iso "${pw}/${out}" | rmdot
+      rmcheck
    fi
    cd "${pw}"
    isz="$(du -h "${out}" | awk {'print $1'})"
    echo " ~ ISO image ready: ${out} (${isz})"
 }
 
-function cmjobsingle() {
+function rmjobsingle() {
    # input arguments
    # package [package ..]
    rm -f .[cpmrdtf]*
@@ -608,45 +608,45 @@ function cmjobsingle() {
       cat .fast | sort | uniq > .pkgs
    fi
    echo " ~ Package with dependencies"
-   cat .pkgs | cmpipe "   "
+   cat .pkgs | rmpipe "   "
    if [ "${met}" == "deep" ]; then
       echo " ~ Dependency tree"
-      cat .tree | cmpipe "   "
+      cat .tree | rmpipe "   "
    fi
    echo " ~ Searching RPMs"
-   RMVERBOSE=1 cmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
+   RMVERBOSE=1 rmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
 }
 
-function cmscandeps() {
-   cmcreatelist
-   cmcollectrpms
+function rmscandeps() {
+   rmcreatelist
+   rmcollectrpms
 }
 
-function cmjobfull() {
-   cmclean
-   cmisomount
-   cmcreatetemplate
-   cmscandeps
-   cmcreaterepo
-   cmcreateiso
-   cmisounmount
+function rmjobfull() {
+   rmclean
+   rmisomount
+   rmcreatetemplate
+   rmscandeps
+   rmcreaterepo
+   rmcreateiso
+   rmisounmount
 }
 
-function cmjobquick() {
+function rmjobquick() {
    if [ "${RMISO}" != "" ]; then
-      cmisomount
+      rmisomount
    fi
-   cmcreatetemplate
-   cmcreaterepo
-   cmcreateiso
-   cmisounmount
+   rmcreatetemplate
+   rmcreaterepo
+   rmcreateiso
+   rmisounmount
 }
 
 if [ ! -e /etc/rocky-release ]; then
-   cmnotrocky
+   rmnotrocky
 fi
 if [ "$(cat /etc/rocky-release | grep "Rocky Linux release 8")" == "" ]; then
-   cmnotrocky
+   rmnotrocky
 fi
 if [ ! -e "/usr/bin/repoquery" -o ! -e "/usr/bin/createrepo" -o ! -e "/usr/bin/yumdownloader" -o ! -e "/usr/bin/curl" -o ! -e "/usr/bin/mkisofs" ]; then
    echo
@@ -673,28 +673,28 @@ fi
 if [ "${1}" == "run" ]; then
    shift
    if [ "${1}" == "force" ]; then
-      cmjobfull
+      rmjobfull
    elif [ -d "${bo}/Packages" ]; then
-      cmjobquick
+      rmjobquick
    else
-      cmjobfull
+      rmjobfull
    fi
 elif [ "${1}" == "clean" ]; then
-   cmclean
+   rmclean
 elif [ "${1}" == "debug" ]; then
    shift
    if [ "${1}" == "" ]; then
-      cmusage
+      rmusage
    fi
-   cmjobsingle "${@}"
+   rmjobsingle "${@}"
 elif [ "${1}" == "step" ]; then
    shift
    if [ "${1}" == "" ]; then
-      cmusagestep
+      rmusagestep
    fi
    cmd="cm${1}"
    shift
    RMVERBOSE=1 CMSTEP=1 ${cmd} "${@}"
 else
-   cmusage
+   rmusage
 fi
