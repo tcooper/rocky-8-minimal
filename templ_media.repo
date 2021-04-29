@@ -1,5 +1,5 @@
 [InstallMedia]
-name=CentOS Linux 8
+name=Rocky Linux 8
 mediaid=None
 metadata_expire=-1
 gpgcheck=0

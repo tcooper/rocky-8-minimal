@@ -4,20 +4,20 @@
 #
 # Evironment variables
 #
-#    CMVERBOSE  : increase verbosity (set any value)
-#    CMISO      : official ISO to use (i.e. CentOS-8.1.1911-x86_64-boot.iso)
-#    CMOUT      : resultig ISO file name (i.e. CentOS-8.1.1911-x86_64-minimal.iso)
-#    CMETH      : dependency resolving method to use (deep or fast)
+#    RMVERBOSE  : increase verbosity (set any value)
+#    RMISO      : official ISO to use (i.e. Rocky-8.1.1911-x86_64-boot.iso)
+#    RMOUT      : resultig ISO file name (i.e. Rocky-8.1.1911-x86_64-minimal.iso)
+#    RMETH      : dependency resolving method to use (deep or fast)
 #
 # Default values
 #
 # default official ISO to use
-iso="CentOS-8.1.1911-x86_64-boot.iso"
+iso="Rocky-8.1.1911-x86_64-boot.iso"
 #
 # resulting ISO file name and volume label
 # such values will be determined again according to source image during ISO mount
-out="CentOS-8.1.1911-x86_64-minimal.iso"
-lbl="CentOS-8-1-1911-x86_64"
+out="Rocky-8.1.1911-x86_64-minimal.iso"
+lbl="Rocky-8-1-1911-x86_64"
 #
 # dependency resolving method
 # deep: check dependency of every package one by one
@@ -57,7 +57,7 @@ function cmusagestep() {
    exit 1
 }
 
-function cmnotcentos() {
+function cmnotrocky() {
    echo
    echo " ! This script is not suitable to use in this platform"
    echo
@@ -77,7 +77,7 @@ function cmpipe() {
 }
 
 function cmdot() {
-   if [ "${CMVERBOSE}" != "" ]; then
+   if [ "${RMVERBOSE}" != "" ]; then
       cmpipe
    else
       echo -n "   "
@@ -102,13 +102,13 @@ function cmisomount() {
       echo
       echo " ! Reference ISO (${iso}) not found."
       echo
-      echo "   You can download CentOS 8 from following resource;"
-      echo "   http://isoredirect.centos.org/centos/8/isos/x86_64/"
+      echo "   You can download Rocky 8 from following resource;"
+      echo "   http://isoredirect.rockylinux.org/rocky/8/isos/x86_64/"
       echo
       echo "   If you want to use different minor release, please"
       echo "   specify it like below;"
       echo
-      echo "   CMISO='/path/to/file.iso' ./bootstrap.sh .."
+      echo "   RMISO='/path/to/file.iso' ./bootstrap.sh .."
       echo
       exit 1
    fi
@@ -119,10 +119,10 @@ function cmisomount() {
       mount -o loop "${iso}" "${md}" 2>&1 | cmpipe
       cmcheck
       echo "   ${md} mounted"
-      if [ "$(cat "${md}/isolinux/isolinux.cfg" | grep "CentOS Linux 8")" == "" ]; then
+      if [ "$(cat "${md}/isolinux/isolinux.cfg" | grep "Rocky Linux 8")" == "" ]; then
          cmisounmount
          echo
-         echo " ! Reference ISO should be one of the CentOS 8 distribution."
+         echo " ! Reference ISO should be one of the Rocky 8 distribution."
          echo
          exit
       fi
@@ -152,7 +152,7 @@ function cmcreatetemplate() {
    cp -r "${md}/EFI" "${dp}/"
    cmcheck
    echo -n "."
-   
+
    cp "templ_discinfo" "${dp}/.discinfo"
    cp "templ_media.repo" "${dp}/media.repo"
    echo -n "."
@@ -198,7 +198,7 @@ function resolvefast() {
    # input arguments
    # package [package ..]
    tf="${CMTEMP}"
-   vb="${CMVERBOSE}"
+   vb="${RMVERBOSE}"
    if [ "${vb}" != "" ]; then
       echo "${@}" | tr " " "\n" | cmpipe "   "
    fi
@@ -215,7 +215,7 @@ function resolvedeep() {
    # package [package ..]
    s="${CMSEP}-"
    tf="${CMTEMP}"
-   vb="${CMVERBOSE}"
+   vb="${RMVERBOSE}"
    repoquery --requires --resolve "${@}" 2>/dev/null | \
       awk -F":" {'print $1'} | \
       sed 's/\-[0-9]\+$//g' | \
@@ -252,10 +252,10 @@ function cmfulldeps() {
    touch ".pkgs" ".tree"
    echo " ~ Resolving dependencies for ${@}"
    if [ "${met}" == "deep" ]; then
-      CMVERBOSE=1 CSEP=" " CMTEMP=".pkgs" resolvedeep "${@}"
+      RMVERBOSE=1 CSEP=" " CMTEMP=".pkgs" resolvedeep "${@}"
    else
       rm -f .fast
-      CMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
+      RMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
       cat .fast | sort | uniq > .pkgs
       rm -f .fast
    fi
@@ -273,24 +273,24 @@ function cmcreatelist() {
    echo " done"
    tp="$(cat .core | sort | uniq | wc -l)"
    echo " ~ Resolving dependencies for ${tp} package(s)"
-   if [ "${CMVERBOSE}" == "" ]; then
+   if [ "${RMVERBOSE}" == "" ]; then
       echo -n "   "
    fi
    rm -f .tree .pkgs
    touch .pkgs
    cat .core | sort | uniq | while read line; do
       if [ "${met}" == "deep" ]; then
-         if [ "${CMVERBOSE}" != "" ]; then
+         if [ "${RMVERBOSE}" != "" ]; then
             CMTEMP=".pkgs" CMSEP=" " resolvedeep "${line}"
          fi
       fi
       echo "${line}" >> .pkgs
-      if [ "${CMVERBOSE}" == "" ]; then
+      if [ "${RMVERBOSE}" == "" ]; then
          echo -n "."
       fi
    done
    if [ "${met}" == "deep" ]; then
-      if [ "${CMVERBOSE}" == "" ]; then
+      if [ "${RMVERBOSE}" == "" ]; then
          CMTEMP=".pkgs" CMSEP=" " resolvedeep $(cat .core | sort | uniq | tr "\n" " ")
       fi
    else
@@ -299,7 +299,7 @@ function cmcreatelist() {
    rm -f .core
    cat .pkgs | sort | uniq > .pkgf
    mv .pkgf .pkgs
-   if [ "${CMVERBOSE}" == "" ]; then
+   if [ "${RMVERBOSE}" == "" ]; then
       echo " done"
    fi
 }
@@ -309,7 +309,7 @@ function cmrpmdownload() {
    # package [package ..]
    if [ "${1}" == "" ]; then
       echo "Usage: ${0} rpmdownload <package>"
-      echo 
+      echo
       exit 1
    fi
    mkdir -p rpms
@@ -346,7 +346,7 @@ function rpmdownload() {
    # package [package ..]
    if [ "${1}" == "" ]; then
       echo " ! Pacakge name required for rpmdownload"
-      echo 
+      echo
       exit 1
    fi
    ul="${CMURL}"
@@ -393,7 +393,7 @@ function cmrpmurl() {
    # package [package ..]
    if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step rpmurl <package> [package ..]"
-      echo 
+      echo
       exit 1
    fi
    yumdownloader --urlprotocol http --urls "${@}" | \
@@ -406,7 +406,7 @@ function cmrpmname() {
    # package [package ..]
    if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step rpmname <package> [package ..]"
-      echo 
+      echo
       exit 1
    fi
    repoquery "${@}" 2>/dev/null | \
@@ -418,10 +418,10 @@ function cmrpmname() {
 function cmcollectrpm() {
    # input arguments
    # package [package ..]
-   vb="${CMVERBOSE}"
+   vb="${RMVERBOSE}"
    if [ "${CMSTEP}" != "" -a "${1}" == "" ]; then
       echo "Usage: ${0} step collectrpm <package> [package ..]"
-      echo 
+      echo
       exit 1
    fi
    cmrpmurl "${@}"
@@ -499,13 +499,13 @@ function cmcollectrpm() {
 function cmcollectrpms() {
    tp="$(cat .pkgs | sort | uniq | wc -l)"
    echo " ~ Searching RPMs for ${tp} package(s)"
-   if [ "${CMVERBOSE}" == "" ]; then
+   if [ "${RMVERBOSE}" == "" ]; then
       echo -n "   "
    fi
    rm -f .miss .rslv .dler
    mkdir -p rpms
    cmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
-   if [ "${CMVERBOSE}" == "" ]; then
+   if [ "${RMVERBOSE}" == "" ]; then
       echo " done"
    fi
 }
@@ -552,14 +552,14 @@ function cmcreateiso() {
       exit 1
    fi
    lbl="$(cat "${dp}/isolinux/isolinux.cfg" | grep "LABEL=" | awk -F"LABEL=" {'print $2'} | awk {'print $1'} | grep -v "^$" | head -1 | tr -d "\n\r")"
-   if [ "${CMOUT}" == "" ]; then
-      ver="$(cat "${dp}/isolinux/isolinux.cfg" | grep "LABEL=CentOS" | head -1 | awk -F"LABEL=CentOS-" {'print $2'} | awk -F"-x86_64" {'print $1'} | sed 's/\-/\./g')"
+   if [ "${RMOUT}" == "" ]; then
+      ver="$(cat "${dp}/isolinux/isolinux.cfg" | grep "LABEL=Rocky" | head -1 | awk -F"LABEL=Rocky-" {'print $2'} | awk -F"-x86_64" {'print $1'} | sed 's/\-/\./g')"
       if [ "${ver}" == "8.BaseOS" ]; then
          ver="8.0.1905"
       elif [ "${ver}" == "Stream.8" ]; then
          ver="8.0.20191219"
       fi
-      out="CentOS-${ver}-x86_64-minimal.iso"
+      out="Rocky-${ver}-x86_64-minimal.iso"
    fi
    echo " ~ Creating ISO image"
    cd "${dp}"
@@ -601,10 +601,10 @@ function cmjobsingle() {
    touch .pkgs .tree
    echo " ~ Creating package list for ${@} "
    if [ "${met}" == "deep" ]; then
-      CMVERBOSE=1 CMTEMP=".pkgs" CMSEP=" " resolvedeep "${@}"
+      RMVERBOSE=1 CMTEMP=".pkgs" CMSEP=" " resolvedeep "${@}"
    else
       rm -f .fast
-      CMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
+      RMVERBOSE=1 CMTEMP=".fast" resolvefast "${@}"
       cat .fast | sort | uniq > .pkgs
    fi
    echo " ~ Package with dependencies"
@@ -614,7 +614,7 @@ function cmjobsingle() {
       cat .tree | cmpipe "   "
    fi
    echo " ~ Searching RPMs"
-   CMVERBOSE=1 cmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
+   RMVERBOSE=1 cmcollectrpm $(cat .pkgs | sort | uniq | tr "\n" " ")
 }
 
 function cmscandeps() {
@@ -633,7 +633,7 @@ function cmjobfull() {
 }
 
 function cmjobquick() {
-   if [ "${CMISO}" != "" ]; then
+   if [ "${RMISO}" != "" ]; then
       cmisomount
    fi
    cmcreatetemplate
@@ -642,11 +642,11 @@ function cmjobquick() {
    cmisounmount
 }
 
-if [ ! -e /etc/centos-release ]; then
-   cmnotcentos
+if [ ! -e /etc/rocky-release ]; then
+   cmnotrocky
 fi
-if [ "$(cat /etc/centos-release | grep "CentOS Linux release 8")" == "" ]; then
-   cmnotcentos
+if [ "$(cat /etc/rocky-release | grep "Rocky Linux release 8")" == "" ]; then
+   cmnotrocky
 fi
 if [ ! -e "/usr/bin/repoquery" -o ! -e "/usr/bin/createrepo" -o ! -e "/usr/bin/yumdownloader" -o ! -e "/usr/bin/curl" -o ! -e "/usr/bin/mkisofs" ]; then
    echo
@@ -657,14 +657,14 @@ if [ ! -e "/usr/bin/repoquery" -o ! -e "/usr/bin/createrepo" -o ! -e "/usr/bin/y
    echo
    exit 1
 fi
-if [ "${CMISO}" != "" ]; then
-   iso="${CMISO}"
+if [ "${RMISO}" != "" ]; then
+   iso="${RMISO}"
 fi
-if [ "${CMOUT}" != "" ]; then
-   out="${CMOUT}"
+if [ "${RMOUT}" != "" ]; then
+   out="${RMOUT}"
 fi
-if [ "${CMETH}" != "" ]; then
-   met="${CMETH}"
+if [ "${RMETH}" != "" ]; then
+   met="${RMETH}"
 fi
 if [ ! -e "packages.txt" ]; then
    touch "packages.txt"
@@ -694,8 +694,7 @@ elif [ "${1}" == "step" ]; then
    fi
    cmd="cm${1}"
    shift
-   CMVERBOSE=1 CMSTEP=1 ${cmd} "${@}"
+   RMVERBOSE=1 CMSTEP=1 ${cmd} "${@}"
 else
    cmusage
 fi
-

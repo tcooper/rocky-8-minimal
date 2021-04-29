@@ -8,8 +8,8 @@ images/pxeboot/vmlinuz = sha256:
 ; WARNING.0 = This section provides compatibility with pre-productmd treeinfos.
 ; WARNING.1 = Read productmd documentation for details about new format.
 arch = x86_64
-family = CentOS Linux
-name = CentOS Linux 8
+family = Rocky Linux
+name = Rocky Linux 8
 packagedir = BaseOS/Packages
 platforms = x86_64,xen
 repository = BaseOS
@@ -36,8 +36,8 @@ discnum = 1
 totaldiscs = 1
 
 [release]
-name = CentOS Linux
-short = CentOS
+name = Rocky Linux
+short = Rocky
 version = 8
 
 [stage2]

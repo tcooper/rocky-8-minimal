@@ -1,6 +1,6 @@
-# centos-8-minimal
+# rocky-8-minimal
 
-A pure bash script to create **minimal installation ISO** image together with **additional packages**, leveraging one of official CentOS 8 ISO distribution.
+A pure bash script to create **minimal installation ISO** image together with **additional packages**, leveraging one of official Rocky 8 ISO distribution.
 
 This will create an ISO image in the order of workflow shown below:
 
@@ -26,28 +26,28 @@ Hence, there are two main parts of this project:
 
   You can build the Dockerfile here and run it with a sample command.  Note that to retrieve your ISO after the container has finished creation, you must specify a mount point at `/mnt` during the container's execution in order to retrieve the file.  Additionally, privileged execution is required by the container to mount the ISO during the recreation process.
 
-  Example: `mkdir ./iso-out && docker build -t centos-8-minimal && docker run --privileged -v ./iso-out:/mnt centos-8-minimal` 
+  Example: `mkdir ./iso-out && docker build -t centos-8-minimal && docker run --privileged -v ./iso-out:/mnt centos-8-minimal`
 
 ### Requirements
 
-- CentOS 8
+- Rocky 8
 
-  You can run script on CentOS 8 only (since it depends on CentOS 8 utilities).
-    
+  You can run script on Rocky 8 only (since it depends on Rocky 8 utilities).
+
 - Some additional packages needs to be installed in order to run the script. Those can be installed by using the command below:
 
         yum -y install yum-utils createrepo syslinux genisoimage isomd5sum bzip2 curl file
 
-- One of the official ISO image of CentOS 8 distribution. Place it to same folder with the script.
+- One of the official ISO image of Rocky 8 distribution. Place it to same folder with the script.
 
-        CentOS-8.X.XXXX-x86_64-boot.iso
-        CentOS-8.X.XXXX-x86_64-dvd1.iso
+        Rocky-8.X.XXXX-x86_64-boot.iso
+        Rocky-8.X.XXXX-x86_64-dvd1.iso
 
 ### Synopsis
 
 Basic usage of the script:
 
-    # ./bootstrap.sh 
+    # ./bootstrap.sh
     Usage: ./bootstrap.sh <run [force] | clean | debug [package [package ..]] | step ..>
 
 Alternative usage for each step (in same workflow order) and usage for some functions:
@@ -78,7 +78,7 @@ You can change the content of "packages.txt" if you wish and then simply run fol
 Script will continue to use the ISO template resource (image/) created at the first run on consequent runs. If you did changes on anywhere, you should "force" it to start job from the scratch by issuing following command;
 
     # ./bootstrap.sh run force
-    
+
 Above command is actually equal to following two commands:
 
     # ./bootstrap.sh clean
@@ -89,13 +89,13 @@ The "clean" switch will do "isounmount" when necessary and will clean ISO templa
 You can run particular workflow-step manually when needed. For example:
 
     # ./bootstrap.sh step createiso
-    
-There are also some functions which will not do any effect on working data. 
+
+There are also some functions which will not do any effect on working data.
 
 For example you can get download links for given package(s):
 
-     # ./bootstrap.sh step rpmurl httpd php 
- 
+     # ./bootstrap.sh step rpmurl httpd php
+
 Or, you can download RPM files directly by issuing;
 
     # ./bootstrap.sh step rpmdownload httpd php
@@ -133,48 +133,48 @@ Again, dowloaded RPM files will be placed into "rpms/" folder for later use (and
 
 ### Environent Variables
 
-- **CMVERBOSE**=\<any value\>
+- **RMVERBOSE**=\<any value\>
 
    It is possible to have verbose output by using this variable with any value. For example;
-   
-        # CMVERBOSE=1 ./bootstrap.sh run force
+
+        # RMVERBOSE=1 ./bootstrap.sh run force
 
    It is not set by default (no verbose output).
-         
-- **CMISO**="referece iso filename"
+
+- **RMISO**="referece iso filename"
 
    You can specify the reference ISO to be used with this variable like;
-   
-        # CMISO="CentOS-8.1.1911-x86_64-boot.iso" ./bootstrap.sh run force
 
-   Script will use "CentOS-8.1.1911-x86\_64-boot.iso" by default if such variable is not given.
-- **CMOUT**="resulting iso filename"
+        # RMISO="Rocky-8.1.1911-x86_64-boot.iso" ./bootstrap.sh run force
+
+   Script will use "Rocky-8.1.1911-x86\_64-boot.iso" by default if such variable is not given.
+- **RMOUT**="resulting iso filename"
 
    You can specify the name of resulting ISO file. For example;
-   
-        # CMOUT="my-minimal-centos-8.iso" ./bootstrap.sh run force    
-- **CMETH**=\<**fast** \| **deep**\>
 
-   The "method" that will be used while resolving package dependencies. You can combine it with *CMVERBOSE* for debugging purposes.
+        # RMOUT="my-minimal-centos-8.iso" ./bootstrap.sh run force    
+- **RMETH**=\<**fast** \| **deep**\>
+
+   The "method" that will be used while resolving package dependencies. You can combine it with *RMVERBOSE* for debugging purposes.
 
    The script will use "fast" method by default. This will use system utilities to resolve dependencies (by issuing "repoquery --requires --resolve --recursive <package>") and will use what it returns as the list of packages.
 
    The "deep" method is a kind of custom implementation of dependency resolving process. It is really slow since it checks each package recursively with its dependencies. But, it will give an idea about the dependency resolving process and it may also useful for debugging if something went wrong.
-   
+
    On the other hand, you can use "deep" method with "debug" switch together to do debugging on single package. For example;
-   
-        # CMETH="deep" ./bootstrap.sh debug php
-    
+
+        # RMETH="deep" ./bootstrap.sh debug php
+
    Above command will display each package checks recursively and will display a dependency tree when it finish resolving.
 
 ### Footnotes
 
 - Group file template
 
-   The list of "core" packages which defined in "templ\_comps.xml" template file is obtained from the "BaseOS" group on official CentOS 8 DVD-ISO.
-   
+   The list of "core" packages which defined in "templ\_comps.xml" template file is obtained from the "BaseOS" group on official Rocky 8 DVD-ISO.
+
    First, its content will be used to collect required installation packages. Then, the list of packages specified in "package.txt" will be merged into it and will be used as group file to include in metadata of the resulting ISO.
-   
+
    You can change such file if you want, but please keep a single empty line inside the "packagelist" of group "core" to merge additional packages defined in package.txt like;
 
 
@@ -186,11 +186,9 @@ Again, dowloaded RPM files will be placed into "rpms/" folder for later use (and
         --- put single empty line here. ---
            </packagelist>
         </group>
-   
+
 - Other Template files
 
-   The template file "tepl\_treeinfo" is obtained from official CentOS 8 DVD-ISO (".treeinfo" is the original name) . It's content will be re-constructed according to the reference ISO you are going to use and the resulting file will be added into ISO template.
-   
-   Other template files (templ\_discinfo, templ\_media.repo) are obtained from official CentOS 8 DVD-ISO and they will be added into resulting ISO as it is.
-   
-   
+   The template file "tepl\_treeinfo" is obtained from official Rocky 8 DVD-ISO (".treeinfo" is the original name) . It's content will be re-constructed according to the reference ISO you are going to use and the resulting file will be added into ISO template.
+
+   Other template files (templ\_discinfo, templ\_media.repo) are obtained from official Rocky 8 DVD-ISO and they will be added into resulting ISO as it is.
