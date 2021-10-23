@@ -12,12 +12,12 @@
 # Default values
 #
 # default official ISO to use
-iso="Rocky-8.3.2011-x86_64-boot.iso"
+iso="Rocky-8.4-x86_64-minimal.iso"
 #
 # resulting ISO file name and volume label
 # such values will be determined again according to source image during ISO mount
-out="Rocky-8.3.2011-x86_64-minimal.iso"
-lbl="Rocky-8-3-2011-x86_64"
+out="Rocky-8.4-x86_64-minimal-testing.iso"
+lbl="Rocky-8-4-x86_64"
 #
 # dependency resolving method
 # deep: check dependency of every package one by one
@@ -103,7 +103,7 @@ function rmisomount() {
       echo " ! Reference ISO (${iso}) not found."
       echo
       echo "   You can download Rocky 8 from following resource;"
-      echo "   http://isoredirect.rockylinux.org/rocky/8/isos/x86_64/"
+      echo "   https://download.rockylinux.org/pub/rocky/8/isos/x86_64/"
       echo
       echo "   If you want to use different minor release, please"
       echo "   specify it like below;"
